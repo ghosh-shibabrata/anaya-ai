@@ -1,6 +1,7 @@
 import { connection } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { executeMcpTool, MCP_TOOL_SPECS } from "@/lib/mcp/tools";
+import { MCP_RESOURCE_SPECS, readMcpResource } from "@/lib/mcp/resources";
 
 export async function GET() {
   await connection();
@@ -12,6 +13,7 @@ export async function GET() {
       byomSupported: ["Claude", "ChatGPT", "Gemini", "Cursor", "Antigravity"],
     },
     tools: MCP_TOOL_SPECS,
+    resources: MCP_RESOURCE_SPECS,
   });
 }
 
@@ -20,9 +22,14 @@ export async function POST(req: NextRequest) {
     jsonrpc?: string;
     id?: string | number | null;
     method?: string;
-    params?: { name?: string; arguments?: Record<string, unknown> };
+    params?: {
+      name?: string;
+      arguments?: Record<string, unknown>;
+      uri?: string;
+    };
     tool?: string;
     args?: Record<string, unknown>;
+    resourceUri?: string;
   };
 
   // Support standard JSON-RPC 2.0 MCP calls
@@ -34,7 +41,10 @@ export async function POST(req: NextRequest) {
         result: {
           protocolVersion: "2024-11-05",
           serverInfo: { name: "anaya-commerceops", version: "1.0.0" },
-          capabilities: { tools: {} },
+          capabilities: {
+            tools: {},
+            resources: { subscribe: false, listChanged: false },
+          },
         },
       });
     }
@@ -57,6 +67,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (body.method === "resources/list") {
+      return NextResponse.json({
+        jsonrpc: "2.0",
+        id: body.id ?? null,
+        result: { resources: MCP_RESOURCE_SPECS },
+      });
+    }
+
+    if (body.method === "resources/read") {
+      const uri = body.params?.uri || "";
+      const result = await readMcpResource(uri);
+      return NextResponse.json({
+        jsonrpc: "2.0",
+        id: body.id ?? null,
+        result,
+      });
+    }
+
     return NextResponse.json(
       {
         jsonrpc: "2.0",
@@ -67,14 +95,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Direct playground call
+  // Direct playground call for resources
+  if (body.resourceUri) {
+    const result = await readMcpResource(body.resourceUri);
+    return NextResponse.json({ ok: !result.isError, resourceUri: body.resourceUri, result });
+  }
+
+  // Direct playground call for tools
   if (body.tool) {
     const result = await executeMcpTool(body.tool, body.args || {});
     return NextResponse.json({ ok: !result.isError, tool: body.tool, result });
   }
 
   return NextResponse.json(
-    { error: "Provide either JSON-RPC { jsonrpc: '2.0', method } or { tool, args }." },
+    {
+      error:
+        "Provide either JSON-RPC { jsonrpc: '2.0', method } or direct { tool, args } / { resourceUri }.",
+    },
     { status: 400 }
   );
 }
