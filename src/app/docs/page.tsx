@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { McpPlayground } from "@/components/docs/McpPlayground";
+import { DocsClientHeader } from "@/components/docs/DocsClientHeader";
 
 const ENDPOINTS = [
   {
@@ -54,6 +55,7 @@ export default function DocsPage() {
               any WooCommerce REST v3 endpoint, or connect Claude, ChatGPT, and
               Gemini directly via Model Context Protocol.
             </p>
+            <DocsClientHeader />
           </div>
 
           <div className="mt-10 grid gap-5 md:grid-cols-3">
