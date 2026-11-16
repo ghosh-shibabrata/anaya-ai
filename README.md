@@ -194,6 +194,16 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) (or jump straight to `/demo` or `/docs`).
 
+### Environment Variables
+
+Copy `.env.example` to `.env`. Only one variable is required for local sandbox operation:
+
+| Variable | Required | Default | Description |
+| :--- | :---: | :--- | :--- |
+| `DATABASE_URL` | **Yes** | `"file:./dev.db"` | Prisma SQLite database file location (relative to `prisma/schema.prisma`). |
+
+> **WooCommerce Credentials:** Live WooCommerce REST v3 credentials (`Store URL`, `Consumer Key`, `Consumer Secret`) are **optional** and never required in `.env`. You can enter them dynamically inside the `/demo` "Connect WooCommerce" modal or leave them blank to use the built-in *Anaya Botanics* simulation.
+
 ### Useful Checks & Resetting Sandbox Data
 
 ```bash
