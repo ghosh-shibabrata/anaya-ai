@@ -4,70 +4,178 @@ import { prisma } from "@/lib/prisma";
 import { ensureSeeded } from "@/lib/seed-data";
 import { synthesizeBuilderPatch } from "@/lib/agents";
 
+export interface ToolAnnotations {
+  title?: string;
+  readOnlyHint?: boolean;
+  destructiveHint?: boolean;
+  idempotentHint?: boolean;
+  openWorldHint?: boolean;
+}
+
+export interface McpToolInputSchema {
+  type: "object";
+  properties: Record<
+    string,
+    {
+      type: string;
+      description: string;
+      enum?: string[];
+      default?: unknown;
+    }
+  >;
+  required?: string[];
+}
+
 export interface McpToolSpec {
   name: string;
+  title: string;
   description: string;
   permissionRole: "Viewer" | "Editor" | "Admin";
-  inputSchema: Record<string, { type: string; description: string; required?: boolean }>;
+  annotations: ToolAnnotations;
+  // Top-level hints mirrored for maximum client and directory compatibility
+  readOnlyHint: boolean;
+  destructiveHint: boolean;
+  idempotentHint: boolean;
+  openWorldHint: boolean;
+  inputSchema: McpToolInputSchema;
   sampleArgs: Record<string, unknown>;
 }
 
 export const MCP_TOOL_SPECS: McpToolSpec[] = [
   {
     name: "get_store_health",
+    title: "Get Store Health",
     description:
       "Returns live store mode, active WooCommerce runtime flags (HPOS, Redis, auto-scaling), environment latency across DEV/QA/PROD, and any active fault.",
     permissionRole: "Viewer",
-    inputSchema: {},
+    annotations: {
+      title: "Get Store Health",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
     sampleArgs: {},
   },
   {
     name: "list_revenue_incidents",
+    title: "List Revenue Incidents",
     description:
       "Lists open and resolved Revenue AI checkout/APM incidents with dollar-at-risk estimates and p99 latency telemetry.",
     permissionRole: "Viewer",
+    annotations: {
+      title: "List Revenue Incidents",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
     inputSchema: {
-      status: {
-        type: "string",
-        description: "Filter by status: 'all' | 'open' | 'staged_qa' | 'resolved'",
-        required: false,
+      type: "object",
+      properties: {
+        status: {
+          type: "string",
+          description: "Filter by status: 'all' | 'open' | 'staged_qa' | 'resolved'",
+          enum: ["all", "open", "staged_qa", "resolved"],
+        },
       },
+      required: [],
     },
     sampleArgs: { status: "all" },
   },
   {
     name: "run_catalog_seo_audit",
+    title: "Run Catalog & SEO Audit",
     description:
       "Audits WooCommerce/Sandbox products for Uncategorized items, missing image alt text, and thin descriptions below 60 characters.",
     permissionRole: "Viewer",
-    inputSchema: {},
+    annotations: {
+      title: "Run Catalog & SEO Audit",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    inputSchema: {
+      type: "object",
+      properties: {},
+      required: [],
+    },
     sampleArgs: {},
   },
   {
     name: "query_analytics",
+    title: "Query Store Analytics",
     description:
       "Queries live order velocity, average checkout latency, and conversion metrics for natural-language BI questions.",
     permissionRole: "Viewer",
+    annotations: {
+      title: "Query Store Analytics",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
     inputSchema: {
-      question: {
-        type: "string",
-        description: "Operational analytics question",
-        required: true,
+      type: "object",
+      properties: {
+        question: {
+          type: "string",
+          description:
+            "Operational or BI analytics question to answer from live orders and latency telemetry",
+        },
       },
+      required: ["question"],
     },
     sampleArgs: { question: "Summarize checkout latency and order revenue today" },
   },
   {
     name: "propose_builder_change",
+    title: "Propose Builder Change",
     description:
       "Stages a plain-English Builder AI storefront patch in QA (non-destructive; awaits human promotion to PROD).",
     permissionRole: "Editor",
+    annotations: {
+      title: "Propose Builder Change",
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
     inputSchema: {
-      prompt: {
-        type: "string",
-        description: "Plain-English storefront change request",
-        required: true,
+      type: "object",
+      properties: {
+        prompt: {
+          type: "string",
+          description: "Plain-English storefront change request to stage into QA",
+        },
       },
+      required: ["prompt"],
     },
     sampleArgs: { prompt: "Set free express shipping threshold to $60" },
   },
@@ -287,13 +395,32 @@ export function createAnayaMcpServer(): McpServer {
     "get_store_health",
     "Returns live store mode, runtime flags, environment latencies, and active faults.",
     {},
+    {
+      title: "Get Store Health",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     async () => executeMcpTool("get_store_health", {})
   );
 
   server.tool(
     "list_revenue_incidents",
     "Lists open and resolved Revenue AI incidents with dollar-at-risk estimates.",
-    { status: z.string().optional() },
+    {
+      status: z
+        .string()
+        .optional()
+        .describe("Filter by incident status: 'all' | 'open' | 'staged_qa' | 'resolved'"),
+    },
+    {
+      title: "List Revenue Incidents",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     async ({ status }) => executeMcpTool("list_revenue_incidents", { status })
   );
 
@@ -301,20 +428,49 @@ export function createAnayaMcpServer(): McpServer {
     "run_catalog_seo_audit",
     "Audits catalog taxonomy, alt text, and product descriptions.",
     {},
+    {
+      title: "Run Catalog & SEO Audit",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     async () => executeMcpTool("run_catalog_seo_audit", {})
   );
 
   server.tool(
     "query_analytics",
     "Queries live order revenue, checkout latency, and failed checkout metrics.",
-    { question: z.string() },
+    {
+      question: z
+        .string()
+        .describe("Operational analytics question to query from telemetry"),
+    },
+    {
+      title: "Query Store Analytics",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     async ({ question }) => executeMcpTool("query_analytics", { question })
   );
 
   server.tool(
     "propose_builder_change",
     "Stages a Builder AI storefront patch in QA awaiting human promotion.",
-    { prompt: z.string() },
+    {
+      prompt: z
+        .string()
+        .describe("Plain-English storefront change request to stage into QA"),
+    },
+    {
+      title: "Propose Builder Change",
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     async ({ prompt }) => executeMcpTool("propose_builder_change", { prompt })
   );
 

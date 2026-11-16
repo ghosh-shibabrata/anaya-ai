@@ -132,6 +132,18 @@ cp .env.example .env
 | `/api/mcp` | `GET`, `POST` | Exposes MCP tool metadata (`GET`) and JSON-RPC 2.0 `initialize`, `tools/list`, and `tools/call` (`POST`). |
 | `/api/contact` | `POST` | Stores merchant evaluation form submissions in `ContactLead`. |
 
+### MCP Tools & Annotations (`@modelcontextprotocol/sdk`)
+
+All 5 tools implement standard JSON Schema definitions and include the four standard MCP tool annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`). Modern MCP clients (Claude Desktop, Cursor, ChatGPT, Antigravity) use these hints to auto-approve safe reads and prompt with confirmation dialogs prior to mutating operations:
+
+| Tool Name | Title | Role | `readOnlyHint` | `destructiveHint` | `idempotentHint` | `openWorldHint` | Summary |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- |
+| `get_store_health` | Get Store Health | `Viewer` | `true` | `false` | `true` | `false` | Live runtime flags, HPOS, Redis, DEV/QA/PROD latencies, and active fault. |
+| `list_revenue_incidents` | List Revenue Incidents | `Viewer` | `true` | `false` | `true` | `false` | Open/resolved checkout & APM incidents with dollar-at-risk telemetry. |
+| `run_catalog_seo_audit` | Run Catalog & SEO Audit | `Viewer` | `true` | `false` | `true` | `false` | Audits catalog for Uncategorized items, missing alt text, and thin descriptions. |
+| `query_analytics` | Query Store Analytics | `Viewer` | `true` | `false` | `true` | `false` | Queries live order velocity, average checkout latency, and conversion stats. |
+| `propose_builder_change` | Propose Builder Change | `Editor` | `false` | `false` | `false` | `false` | Stages plain-English Builder AI storefront patch in QA (awaits human approval). |
+
 ---
 
 ## Local Development

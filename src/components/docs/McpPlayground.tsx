@@ -133,13 +133,24 @@ export function McpPlayground() {
                     : "border-white/[0.06] bg-[#09090b] hover:border-white/15"
                 }`}
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <span className="font-mono text-xs font-semibold text-white">
                     {tool.name}
                   </span>
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 font-mono text-[10px] text-[#d1d1d6]">
-                    {tool.permissionRole}
-                  </span>
+                  <div className="flex items-center gap-1.5 font-mono text-[10px]">
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 ${
+                        tool.readOnlyHint
+                          ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                          : "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                      }`}
+                    >
+                      {tool.readOnlyHint ? "read-only" : "mutating"}
+                    </span>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[#d1d1d6]">
+                      {tool.permissionRole}
+                    </span>
+                  </div>
                 </div>
                 <p className="mt-1 text-[11px] leading-relaxed text-[#86868b]">
                   {tool.description}
@@ -151,9 +162,55 @@ export function McpPlayground() {
 
         <div className="space-y-3 lg:col-span-7">
           {activeSpec && (
-            <div className="rounded-2xl border border-white/[0.08] bg-[#09090b] p-3.5 text-xs text-[#d1d1d6]">
-              <span className="font-mono text-[#30d158]">{activeSpec.name}</span>:{" "}
-              {activeSpec.description}
+            <div className="space-y-2 rounded-2xl border border-white/[0.08] bg-[#09090b] p-4 text-xs text-[#d1d1d6]">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-semibold text-[#30d158]">{activeSpec.name}</span>
+                  {activeSpec.title && (
+                    <span className="text-[11px] text-[#86868b]">({activeSpec.title})</span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[#d1d1d6]">
+                    Role: {activeSpec.permissionRole}
+                  </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 ${
+                      activeSpec.readOnlyHint
+                        ? "border border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                        : "border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                    }`}
+                  >
+                    {activeSpec.readOnlyHint ? "read-only" : "mutating"}
+                  </span>
+                  <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-blue-300">
+                    {activeSpec.idempotentHint ? "idempotent" : "non-idempotent"}
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[#86868b]">
+                    {activeSpec.destructiveHint ? "destructive" : "non-destructive"}
+                  </span>
+                </div>
+              </div>
+              <p className="text-[12px] leading-relaxed text-[#a1a1a6]">{activeSpec.description}</p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/[0.06] pt-2 font-mono text-[10px] text-[#86868b]">
+                <span className="text-white/60">MCP Hints:</span>
+                <span>
+                  readOnlyHint=
+                  <code className="text-emerald-400">{String(activeSpec.readOnlyHint)}</code>
+                </span>
+                <span>
+                  destructiveHint=
+                  <code className="text-[#d1d1d6]">{String(activeSpec.destructiveHint)}</code>
+                </span>
+                <span>
+                  idempotentHint=
+                  <code className="text-blue-300">{String(activeSpec.idempotentHint)}</code>
+                </span>
+                <span>
+                  openWorldHint=
+                  <code className="text-[#d1d1d6]">{String(activeSpec.openWorldHint)}</code>
+                </span>
+              </div>
             </div>
           )}
 
