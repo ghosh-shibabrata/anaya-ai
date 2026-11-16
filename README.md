@@ -176,3 +176,4 @@ rm -f prisma/dev.db && npx prisma db push
 ## License
 
 Licensed under the [MIT License](LICENSE).
+[![M8ven Score](https://m8ven.ai/badge/mcp/ghoshshivam670-cpu-anaya-ai-11bk5m?v=7db801aa2cdd55846a53e697dbc0ef72)](https://m8ven.ai/mcp/ghoshshivam670-cpu-anaya-ai-11bk5m?s=readme)
