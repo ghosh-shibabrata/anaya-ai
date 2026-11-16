@@ -144,6 +144,34 @@ All 5 tools implement standard JSON Schema definitions and include the four stan
 | `query_analytics` | Query Store Analytics | `Viewer` | `true` | `false` | `true` | `false` | Queries live order velocity, average checkout latency, and conversion stats. |
 | `propose_builder_change` | Propose Builder Change | `Editor` | `false` | `false` | `false` | `false` | Stages plain-English Builder AI storefront patch in QA (awaits human approval). |
 
+### MCP Resources (`anaya://` URIs)
+
+Resources allow connected LLMs to hydrate full store context directly into their context window without executing tool calls:
+
+| Resource URI | Title | MIME Type | Contents |
+| :--- | :--- | :--- | :--- |
+| `anaya://store/health` | Store Health Snapshot | `application/json` | Mode, runtime flags (HPOS, Redis, auto-scaling), DEV/QA/PROD node latencies, active fault. |
+| `anaya://incidents/open` | Open Revenue Incidents | `application/json` | Active checkout APM incidents, severity, revenue-at-risk/hr, affected endpoints. |
+| `anaya://catalog/audit` | Catalog Taxonomy & SEO Audit | `application/json` | SKU scan findings: uncategorized taxonomies, missing alt tags, thin descriptions. |
+| `anaya://environments/pipeline` | Isolated Pipeline State | `application/json` | Release tags, commit SHAs, p95 latencies, staged Builder patches across DEV/QA/PROD. |
+
+### MCP Prompts (`prompts/get`)
+
+Context-aware prompt recipes that appear in AI client slash menus (`/`):
+
+| Prompt Name | Title | Arguments | Workflow |
+| :--- | :--- | :--- | :--- |
+| `diagnose_checkout_fault` | Diagnose Checkout APM Fault | `incidentFilter` (opt) | Pulls live incident telemetry and synthesizes root-cause PHP / hook patches for QA staging. |
+| `propose_growth_campaign` | Propose Growth Campaign | `objective` (req) | Analyzes basket velocity and crafts Builder AI promo rules to lift conversions. |
+| `catalog_seo_remediation` | Catalog SEO Remediation | `categoryFilter` (opt) | Scans products and produces actionable JSON repairs ready for WooCommerce REST v3. |
+
+### Remote Streaming via SSE (`/api/mcp/sse`)
+
+Anaya.ai exposes an official Model Context Protocol Server-Sent Events (SSE) streaming transport for remote connections:
+- **SSE Stream**: `GET /api/mcp/sse` (receives `endpoint` event with assigned `sessionId` and streams responses)
+- **JSON-RPC Dispatch**: `POST /api/mcp/sse?sessionId=<id>` or `POST /api/mcp`
+
+
 ---
 
 ## Local Development
