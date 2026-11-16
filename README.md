@@ -5,6 +5,7 @@
 [![Prisma](https://img.shields.io/badge/Prisma-SQLite-2D3748?style=flat-square&logo=prisma)](https://www.prisma.io/)
 [![MCP](https://img.shields.io/badge/MCP-JSON--RPC%202.0-10B981?style=flat-square)](https://modelcontextprotocol.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![CI](https://github.com/ghoshshivam670-cpu/anaya-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/ghoshshivam670-cpu/anaya-ai/actions)
 
 **Anaya.ai** is an agentic WooCommerce StoreOps platform showcase, isolated release control plane, and SQLite-backed interactive sandbox built with **Next.js (App Router)**, **TypeScript**, **Tailwind CSS**, **Prisma**, and the **Model Context Protocol (`@modelcontextprotocol/sdk`)**.
 
@@ -196,6 +197,9 @@ Open [http://localhost:3000](http://localhost:3000) (or jump straight to `/demo`
 ### Useful Checks & Resetting Sandbox Data
 
 ```bash
+# Run automated MCP protocol & StoreOps test suite
+npm test
+
 # Type-check & lint
 npx tsc --noEmit
 npm run lint
