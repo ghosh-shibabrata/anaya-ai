@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureSeeded } from "@/lib/seed-data";
 import { synthesizeBuilderPatch } from "@/lib/agents";
 import { MCP_RESOURCE_SPECS, readMcpResource } from "@/lib/mcp/resources";
+import { MCP_PROMPT_SPECS, getMcpPrompt } from "@/lib/mcp/prompts";
 
 export interface ToolAnnotations {
   title?: string;
@@ -498,6 +499,61 @@ export function createAnayaMcpServer(): McpServer {
       }
     );
   }
+
+
+  // Register MCP Prompts
+  server.prompt(
+    "diagnose_checkout_fault",
+    "Contextual prompt to analyze checkout latency spikes, N+1 queries, and generate a validated PHP fix patch for QA.",
+    {
+      incidentFilter: z
+        .string()
+        .optional()
+        .describe("Filter incidents by severity: 'critical' | 'warning' | 'all'"),
+    },
+    async (args) => {
+      const res = await getMcpPrompt("diagnose_checkout_fault", (args as Record<string, string>) || {});
+      return {
+        description: res.description,
+        messages: res.messages,
+      };
+    }
+  );
+
+  server.prompt(
+    "propose_growth_campaign",
+    "Contextual prompt to analyze cart order velocity and stage a Builder AI promotion patch into QA.",
+    {
+      objective: z
+        .string()
+        .describe("Business goal (e.g. 'Increase AOV above $80', 'End-of-season clearance')"),
+    },
+    async (args) => {
+      const res = await getMcpPrompt("propose_growth_campaign", (args as Record<string, string>) || {});
+      return {
+        description: res.description,
+        messages: res.messages,
+      };
+    }
+  );
+
+  server.prompt(
+    "catalog_seo_remediation",
+    "Contextual prompt auditing thin descriptions, missing image alt text, and uncategorized WooCommerce SKUs.",
+    {
+      categoryFilter: z
+        .string()
+        .optional()
+        .describe("Specific category to focus audit on (default: 'all')"),
+    },
+    async (args) => {
+      const res = await getMcpPrompt("catalog_seo_remediation", (args as Record<string, string>) || {});
+      return {
+        description: res.description,
+        messages: res.messages,
+      };
+    }
+  );
 
   return server;
 }
