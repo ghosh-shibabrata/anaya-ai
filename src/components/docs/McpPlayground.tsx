@@ -15,6 +15,7 @@ import {
 import type { McpToolSpec } from "@/lib/mcp/tools";
 import type { McpResourceSpec } from "@/lib/mcp/resources";
 import type { McpPromptSpec } from "@/lib/mcp/prompts";
+import { McpCodeSnippets } from "@/components/docs/McpCodeSnippets";
 
 type TabMode = "tools" | "resources" | "prompts";
 
@@ -594,6 +595,31 @@ export function McpPlayground() {
               {output}
             </pre>
           )}
+        
+          {/* Multi-language Code Integration Snippets */}
+          <McpCodeSnippets
+            tab={activeTab}
+            targetName={
+              activeTab === "tools"
+                ? selectedTool
+                : activeTab === "resources"
+                ? selectedResource
+                : selectedPrompt
+            }
+            args={
+              activeTab === "tools"
+                ? (() => {
+                    try {
+                      return JSON.parse(argsText || "{}");
+                    } catch {
+                      return {};
+                    }
+                  })()
+                : activeTab === "prompts"
+                ? promptArgs
+                : {}
+            }
+          />
         </div>
       </div>
     </div>
