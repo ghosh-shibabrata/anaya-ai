@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { executeMcpTool, MCP_TOOL_SPECS } from "@/lib/mcp/tools";
 import { MCP_RESOURCE_SPECS, readMcpResource } from "@/lib/mcp/resources";
+import { MCP_PROMPT_SPECS, getMcpPrompt } from "@/lib/mcp/prompts";
 
 export async function GET() {
   await connection();
@@ -14,6 +15,7 @@ export async function GET() {
     },
     tools: MCP_TOOL_SPECS,
     resources: MCP_RESOURCE_SPECS,
+    prompts: MCP_PROMPT_SPECS,
   });
 }
 
@@ -30,6 +32,7 @@ export async function POST(req: NextRequest) {
     tool?: string;
     args?: Record<string, unknown>;
     resourceUri?: string;
+    prompt?: string;
   };
 
   // Support standard JSON-RPC 2.0 MCP calls
@@ -44,6 +47,7 @@ export async function POST(req: NextRequest) {
           capabilities: {
             tools: {},
             resources: { subscribe: false, listChanged: false },
+            prompts: { listChanged: false },
           },
         },
       });
@@ -85,6 +89,25 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    if (body.method === "prompts/list") {
+      return NextResponse.json({
+        jsonrpc: "2.0",
+        id: body.id ?? null,
+        result: { prompts: MCP_PROMPT_SPECS },
+      });
+    }
+
+    if (body.method === "prompts/get") {
+      const promptName = body.params?.name || "";
+      const args = (body.params?.arguments as Record<string, string>) || {};
+      const result = await getMcpPrompt(promptName, args);
+      return NextResponse.json({
+        jsonrpc: "2.0",
+        id: body.id ?? null,
+        result,
+      });
+    }
+
     return NextResponse.json(
       {
         jsonrpc: "2.0",
@@ -93,6 +116,12 @@ export async function POST(req: NextRequest) {
       },
       { status: 400 }
     );
+  }
+
+  // Direct playground call for prompts
+  if (body.prompt) {
+    const result = await getMcpPrompt(body.prompt, (body.args as Record<string, string>) || {});
+    return NextResponse.json({ ok: !result.isError, prompt: body.prompt, result });
   }
 
   // Direct playground call for resources
@@ -110,7 +139,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(
     {
       error:
-        "Provide either JSON-RPC { jsonrpc: '2.0', method } or direct { tool, args } / { resourceUri }.",
+        "Provide either JSON-RPC { jsonrpc: '2.0', method } or direct { tool, args } / { resourceUri } / { prompt, args }.",
     },
     { status: 400 }
   );
