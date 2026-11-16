@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Generate Prisma Engine & Seed DB
+        run: |
+          npx prisma generate
+          npx prisma db push
+
+      - name: TypeScript Static Typecheck
+        run: npx tsc --noEmit
+
+      - name: ESLint Code Quality Gate
+        run: npm run lint
+
+      - name: Run MCP & StoreOps Test Suite
+        run: npm test
+
+      - name: Production Build
+        run: npm run build
