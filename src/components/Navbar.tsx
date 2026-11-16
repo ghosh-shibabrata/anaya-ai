@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Command, Menu, Search, X } from "lucide-react";
 import { useState } from "react";
 import { brand } from "@/config/brand";
 
@@ -17,6 +17,10 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  function handleOpenPalette() {
+    window.dispatchEvent(new CustomEvent("open-command-palette"));
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/[0.06] bg-[#fbfbfd]/80 backdrop-blur-2xl backdrop-saturate-150">
@@ -63,6 +67,19 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
+          <button
+            type="button"
+            onClick={handleOpenPalette}
+            className="flex items-center gap-2 rounded-full border border-black/[0.08] bg-black/[0.03] px-3 py-1.5 text-xs text-[#6e6e73] transition hover:border-black/20 hover:bg-black/[0.05] hover:text-[#1d1d1f]"
+            title="Open Command Palette (Cmd+K)"
+          >
+            <Search className="h-3 w-3" />
+            <span className="hidden lg:inline text-[11px]">Quick Search</span>
+            <kbd className="flex items-center gap-0.5 rounded border border-black/10 bg-white/80 px-1.5 py-0.5 font-mono text-[9px] text-[#86868b] shadow-2xs">
+              <Command className="h-2.5 w-2.5" />K
+            </kbd>
+          </button>
+
           <Link
             href="/contact"
             className="text-xs font-medium text-[#0071e3] transition-opacity hover:opacity-80"
@@ -77,14 +94,24 @@ export function Navbar() {
           </Link>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="inline-flex items-center justify-center rounded-lg p-1.5 text-[#1d1d1f] md:hidden"
-          aria-label="Toggle navigation menu"
-        >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <button
+            type="button"
+            onClick={handleOpenPalette}
+            className="rounded-lg p-1.5 text-[#1d1d1f] hover:bg-black/[0.04]"
+            aria-label="Open Command Palette"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="inline-flex items-center justify-center rounded-lg p-1.5 text-[#1d1d1f]"
+            aria-label="Toggle navigation menu"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
 
       {open && (
@@ -101,6 +128,17 @@ export function Navbar() {
               </Link>
             ))}
             <div className="mt-3 flex flex-col gap-2 border-t border-black/[0.06] pt-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  handleOpenPalette();
+                }}
+                className="flex items-center justify-center gap-2 rounded-full border border-black/15 px-4 py-2 text-center text-sm font-medium text-[#1d1d1f]"
+              >
+                <Search className="h-3.5 w-3.5" />
+                Spotlight Command Palette (⌘K)
+              </button>
               <Link
                 href="/contact"
                 onClick={() => setOpen(false)}

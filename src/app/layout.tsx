@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { brand } from "@/config/brand";
+import { CommandPalette } from "@/components/common/CommandPalette";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-[#fbfbfd] text-[#1d1d1f] selection:bg-[#0071e3]/15 selection:text-[#1d1d1f]">
         {children}
+        <CommandPalette />
       </body>
     </html>
   );
