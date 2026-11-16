@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, Copy, ExternalLink, Sparkles, X } from "lucide-react";
+import { useState } from "react";
+import { Check, Copy, Sparkles, X } from "lucide-react";
 
 type ClientType = "cursor" | "claude" | "chatgpt" | "windsurf" | "curl";
 
@@ -13,13 +13,11 @@ interface McpConfigModalProps {
 export function McpConfigModal({ open, onClose }: McpConfigModalProps) {
   const [client, setClient] = useState<ClientType>("cursor");
   const [copied, setCopied] = useState(false);
-  const [origin, setOrigin] = useState("http://localhost:3000");
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.origin) {
-      setOrigin(window.location.origin);
-    }
-  }, []);
+  const [origin] = useState(() =>
+    typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : "http://localhost:3000"
+  );
 
   if (!open) return null;
 

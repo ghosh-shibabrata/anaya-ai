@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ensureSeeded } from "@/lib/seed-data";
 import { synthesizeBuilderPatch } from "@/lib/agents";
 import { MCP_RESOURCE_SPECS, readMcpResource } from "@/lib/mcp/resources";
-import { MCP_PROMPT_SPECS, getMcpPrompt } from "@/lib/mcp/prompts";
+import { getMcpPrompt } from "@/lib/mcp/prompts";
 
 export interface ToolAnnotations {
   title?: string;

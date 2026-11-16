@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
 type SnippetLang = "curl" | "typescript" | "python";
@@ -14,13 +14,11 @@ interface McpCodeSnippetsProps {
 export function McpCodeSnippets({ tab, targetName, args }: McpCodeSnippetsProps) {
   const [lang, setLang] = useState<SnippetLang>("curl");
   const [copied, setCopied] = useState(false);
-  const [origin, setOrigin] = useState("http://localhost:3000");
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.origin) {
-      setOrigin(window.location.origin);
-    }
-  }, []);
+  const [origin] = useState(() =>
+    typeof window !== "undefined" && window.location.origin
+      ? window.location.origin
+      : "http://localhost:3000"
+  );
 
   const httpUrl = `${origin}/api/mcp`;
   const sseUrl = `${origin}/api/mcp/sse`;

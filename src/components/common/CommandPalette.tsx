@@ -18,7 +18,6 @@ import {
   Sparkles,
   Terminal,
   Wrench,
-  X,
 } from "lucide-react";
 import { McpConfigModal } from "@/components/docs/McpConfigModal";
 
@@ -63,11 +62,6 @@ export function CommandPalette() {
       window.removeEventListener("open-command-palette", handleCustomOpen);
     };
   }, [open]);
-
-  // Reset selected index when query changes
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
 
   const items: PaletteItem[] = [
     // Navigation
@@ -247,6 +241,8 @@ export function CommandPalette() {
       item.category.toLowerCase().includes(query.toLowerCase())
   );
 
+  const activeIndex = selectedIndex < filtered.length ? selectedIndex : 0;
+
   function handleSelect(item: PaletteItem) {
     void item.action();
   }
@@ -258,9 +254,9 @@ export function CommandPalette() {
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prev) => (prev - 1 >= 0 ? prev - 1 : filtered.length - 1));
-    } else if (e.key === "Enter" && filtered[selectedIndex]) {
+    } else if (e.key === "Enter" && filtered[activeIndex]) {
       e.preventDefault();
-      handleSelect(filtered[selectedIndex]);
+      handleSelect(filtered[activeIndex]);
     }
   }
 
@@ -286,7 +282,10 @@ export function CommandPalette() {
                 autoFocus
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setSelectedIndex(0);
+                }}
                 placeholder="Type a command or search (e.g. 'sandbox', 'fault', 'config', 'mcp')..."
                 className="w-full bg-transparent text-sm text-white placeholder-[#86868b] outline-none"
               />
@@ -310,7 +309,7 @@ export function CommandPalette() {
                 </div>
               ) : (
                 filtered.map((item, index) => {
-                  const isSelected = index === selectedIndex;
+                  const isSelected = index === activeIndex;
                   return (
                     <button
                       key={item.id}
