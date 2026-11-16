@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { NextRequest, NextResponse } from "next/server";
 import { handleMcpJsonRpc, JsonRpcRequest } from "@/lib/mcp/jsonrpc";
 import {
@@ -7,10 +8,8 @@ import {
   mcpSseSessions,
 } from "@/lib/mcp/sse-session";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function GET() {
+  await connection();
   const sessionId = crypto.randomUUID();
   const encoder = new TextEncoder();
   let keepAliveTimer: NodeJS.Timeout | null = null;
