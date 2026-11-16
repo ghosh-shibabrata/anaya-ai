@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { ensureSeeded } from "@/lib/seed-data";
 import { synthesizeBuilderPatch } from "@/lib/agents";
+import { MCP_RESOURCE_SPECS, readMcpResource } from "@/lib/mcp/resources";
 
 export interface ToolAnnotations {
   title?: string;
@@ -473,6 +474,30 @@ export function createAnayaMcpServer(): McpServer {
     },
     async ({ prompt }) => executeMcpTool("propose_builder_change", { prompt })
   );
+
+
+  // Register MCP Resources (anaya:// URIs)
+  for (const res of MCP_RESOURCE_SPECS) {
+    server.resource(
+      res.name,
+      res.uri,
+      {
+        description: res.description,
+        mimeType: res.mimeType,
+      },
+      async (uri) => {
+        const rawUri = typeof uri === "string" ? uri : ((uri && uri.href) ? uri.href : res.uri);
+        const result = await readMcpResource(rawUri);
+        return {
+          contents: result.contents.map((item) => ({
+            uri: item.uri,
+            mimeType: item.mimeType,
+            text: item.text,
+          })),
+        };
+      }
+    );
+  }
 
   return server;
 }
